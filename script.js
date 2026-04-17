@@ -183,6 +183,8 @@
 
     let rafId = 0;
     let running = false;
+    let countdownActive = false;
+    let countdownTimer = null;
     let distance = 0;
     let fishScore = 0;
     let score = 0;
@@ -259,6 +261,7 @@
 
     function endGame() {
       running = false;
+      countdownActive = false;
       if (gameOverlay) {
         gameOverlay.textContent = "Crashed into seaweed. Score: " + score;
         gameOverlay.style.display = "block";
@@ -273,11 +276,12 @@
 
     function flap() {
       if (!running) return;
-      shark.vy = -4.8;
+      shark.vy = -4.3;
     }
 
-    function resetGame() {
-      running = true;
+    function resetGameState() {
+      running = false;
+      countdownActive = false;
       distance = 0;
       fishScore = 0;
       score = 0;
@@ -287,9 +291,47 @@
       fishes = [];
       shark.vy = 0;
       shark.y = gameField.clientHeight / 2;
-      if (gameOverlay) gameOverlay.style.display = "none";
+      if (countdownTimer) {
+        window.clearInterval(countdownTimer);
+        countdownTimer = null;
+      }
       updateGameText();
       spawnObstacle();
+    }
+
+    function startWithCountdown() {
+      resetGameState();
+      countdownActive = true;
+
+      if (gameOverlay) {
+        gameOverlay.style.display = "block";
+      }
+
+      let count = 3;
+      if (gameOverlay) {
+        gameOverlay.textContent = "Starting in " + count;
+      }
+
+      countdownTimer = window.setInterval(function () {
+        count -= 1;
+        if (count > 0) {
+          if (gameOverlay) gameOverlay.textContent = "Starting in " + count;
+          return;
+        }
+
+        if (count === 0) {
+          if (gameOverlay) gameOverlay.textContent = "GO!";
+          running = true;
+          countdownActive = false;
+          window.setTimeout(function () {
+            if (running && gameOverlay) {
+              gameOverlay.style.display = "none";
+            }
+          }, 350);
+          window.clearInterval(countdownTimer);
+          countdownTimer = null;
+        }
+      }, 1000);
     }
 
     function drawBackground() {
@@ -317,8 +359,8 @@
 
       if (running) {
         frame += 1;
-        shark.vy += 0.24;
-        shark.vy = Math.min(shark.vy, 6);
+        shark.vy += 0.17;
+        shark.vy = Math.min(shark.vy, 5.2);
         shark.y += shark.vy;
         distance += speed * 0.08;
         score = Math.floor(distance + fishScore * 25);
@@ -408,14 +450,14 @@
 
     if (startGameBtn) {
       startGameBtn.addEventListener("click", function () {
-        resetGame();
-        showToast("Shark run started.");
+        startWithCountdown();
+        showToast("Get ready. Keep tapping to stay in control.");
       });
     }
 
     if (gameField) {
       gameField.addEventListener("pointerdown", function () {
-        if (!running) return;
+        if (!running || countdownActive) return;
         flap();
       });
     }
