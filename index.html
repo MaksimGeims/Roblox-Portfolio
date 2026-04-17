@@ -144,17 +144,18 @@
 
           <div class="shark-panel shark-game-panel">
             <h3 class="mini-title">Mini Game: Feed The Shark</h3>
-            <p class="mini-help">Tap the fish before time runs out. 15 seconds, pure shark business.</p>
+            <p class="mini-help">Dino-style run: keep the shark swimming, dodge seaweed, eat fish for points.</p>
             <div class="game-stats">
-              <span>Time: <strong id="gameTime">15</strong>s</span>
+              <span>Distance: <strong id="gameDistance">0</strong></span>
+              <span>Fish: <strong id="gameFish">0</strong></span>
               <span>Score: <strong id="gameScore">0</strong></span>
               <span>Best: <strong id="gameBest">0</strong></span>
             </div>
             <div class="game-field" id="gameField" aria-label="Mini game field">
-              <button id="fishBtn" class="fish-btn" type="button" aria-label="Catch fish">🐟</button>
+              <canvas id="sharkCanvas" aria-label="Shark runner game"></canvas>
               <p id="gameOverlay" class="game-overlay">Press Start</p>
             </div>
-            <button class="btn btn-primary" id="startGameBtn" type="button">Start Shark Rush</button>
+            <button class="btn btn-primary" id="startGameBtn" type="button">Start Shark Run</button>
           </div>
         </div>
       </div>

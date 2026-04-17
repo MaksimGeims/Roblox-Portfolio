@@ -110,10 +110,11 @@
   const memeBtn = document.getElementById("memeBtn");
   const seaModeBtn = document.getElementById("seaModeBtn");
   const startGameBtn = document.getElementById("startGameBtn");
-  const fishBtn = document.getElementById("fishBtn");
+  const sharkCanvas = document.getElementById("sharkCanvas");
   const gameField = document.getElementById("gameField");
   const gameOverlay = document.getElementById("gameOverlay");
-  const gameTimeElement = document.getElementById("gameTime");
+  const gameDistanceElement = document.getElementById("gameDistance");
+  const gameFishElement = document.getElementById("gameFish");
   const gameScoreElement = document.getElementById("gameScore");
   const gameBestElement = document.getElementById("gameBest");
   const easterEgg = document.getElementById("easterEgg");
@@ -175,88 +176,263 @@
     });
   }
 
-  let gameTimer = null;
-  let gameLeft = 15;
-  let gameScore = 0;
-  let gameRunning = false;
-  const bestScore = Number(window.localStorage.getItem("sharkRushBest") || "0");
+  if (sharkCanvas && gameField) {
+    const ctx = sharkCanvas.getContext("2d");
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const bestScore = Number(window.localStorage.getItem("sharkRushBest") || "0");
 
-  if (gameBestElement) {
-    gameBestElement.textContent = String(bestScore);
-  }
+    let rafId = 0;
+    let running = false;
+    let distance = 0;
+    let fishScore = 0;
+    let score = 0;
+    let speed = 3.6;
+    let frame = 0;
+    let obstacles = [];
+    let fishes = [];
+    let shark = { x: 90, y: 100, vy: 0, size: 18 };
 
-  function setGameText() {
-    if (gameTimeElement) gameTimeElement.textContent = String(gameLeft);
-    if (gameScoreElement) gameScoreElement.textContent = String(gameScore);
-  }
-
-  function moveFish() {
-    if (!fishBtn || !gameField) return;
-    const fishSize = fishBtn.offsetWidth || 56;
-    const maxX = gameField.clientWidth - fishSize;
-    const maxY = gameField.clientHeight - fishSize;
-    const x = Math.max(0, Math.floor(Math.random() * maxX));
-    const y = Math.max(0, Math.floor(Math.random() * maxY));
-    fishBtn.style.left = x + fishSize / 2 + "px";
-    fishBtn.style.top = y + fishSize / 2 + "px";
-  }
-
-  function stopGame() {
-    gameRunning = false;
-    if (fishBtn) fishBtn.disabled = true;
-    if (gameTimer) {
-      window.clearInterval(gameTimer);
-      gameTimer = null;
+    function resizeCanvas() {
+      const width = gameField.clientWidth;
+      const height = gameField.clientHeight;
+      sharkCanvas.width = Math.floor(width * dpr);
+      sharkCanvas.height = Math.floor(height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      shark.y = Math.min(height - 30, Math.max(30, shark.y || height / 2));
     }
-    if (gameOverlay) {
-      gameOverlay.textContent = "Finished. Score: " + gameScore;
-      gameOverlay.style.display = "block";
-    }
-    const oldBest = Number(window.localStorage.getItem("sharkRushBest") || "0");
-    if (gameScore > oldBest) {
-      window.localStorage.setItem("sharkRushBest", String(gameScore));
-      if (gameBestElement) gameBestElement.textContent = String(gameScore);
-      showToast("New high score: " + gameScore);
-    }
-  }
 
-  function startGame() {
-    gameLeft = 15;
-    gameScore = 0;
-    gameRunning = true;
-    setGameText();
-    if (fishBtn) fishBtn.disabled = false;
-    if (gameOverlay) gameOverlay.style.display = "none";
-    moveFish();
-
-    if (gameTimer) {
-      window.clearInterval(gameTimer);
+    function updateGameText() {
+      if (gameDistanceElement) gameDistanceElement.textContent = String(Math.floor(distance));
+      if (gameFishElement) gameFishElement.textContent = String(fishScore);
+      if (gameScoreElement) gameScoreElement.textContent = String(score);
     }
-    gameTimer = window.setInterval(function () {
-      gameLeft -= 1;
-      setGameText();
-      if (gameLeft <= 0) {
-        stopGame();
+
+    function drawShark() {
+      ctx.save();
+      ctx.translate(shark.x, shark.y);
+      ctx.fillStyle = "#9fefff";
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 24, 13, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-20, 0);
+      ctx.lineTo(-34, -9);
+      ctx.lineTo(-34, 9);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = "#0a1724";
+      ctx.beginPath();
+      ctx.arc(11, -3, 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawSeaweed(x, y, h) {
+      ctx.fillStyle = "#1da96d";
+      ctx.fillRect(x, y, 24, h);
+      ctx.fillStyle = "#2fd58c";
+      ctx.fillRect(x + 10, y, 7, h);
+    }
+
+    function spawnObstacle() {
+      const h = gameField.clientHeight;
+      const gap = 80;
+      const gapTop = 26 + Math.random() * (h - gap - 52);
+      obstacles.push({ x: gameField.clientWidth + 20, gapTop: gapTop, gapBottom: gapTop + gap, width: 24, passed: false });
+      if (Math.random() > 0.25) {
+        fishes.push({
+          x: gameField.clientWidth + 90,
+          y: gapTop + 12 + Math.random() * (gap - 24),
+          size: 8,
+          taken: false
+        });
       }
-    }, 1000);
-  }
+    }
 
-  setGameText();
+    function isCollidingRect(rect) {
+      const closestX = Math.max(rect.x, Math.min(shark.x, rect.x + rect.w));
+      const closestY = Math.max(rect.y, Math.min(shark.y, rect.y + rect.h));
+      const dx = shark.x - closestX;
+      const dy = shark.y - closestY;
+      return dx * dx + dy * dy < shark.size * shark.size;
+    }
 
-  if (fishBtn) {
-    fishBtn.disabled = true;
-    fishBtn.addEventListener("click", function () {
-      if (!gameRunning) return;
-      gameScore += 1;
-      setGameText();
-      moveFish();
+    function endGame() {
+      running = false;
+      if (gameOverlay) {
+        gameOverlay.textContent = "Crashed into seaweed. Score: " + score;
+        gameOverlay.style.display = "block";
+      }
+      const currentBest = Number(window.localStorage.getItem("sharkRushBest") || "0");
+      if (score > currentBest) {
+        window.localStorage.setItem("sharkRushBest", String(score));
+        if (gameBestElement) gameBestElement.textContent = String(score);
+        showToast("New best shark score: " + score);
+      }
+    }
+
+    function flap() {
+      if (!running) return;
+      shark.vy = -4.8;
+    }
+
+    function resetGame() {
+      running = true;
+      distance = 0;
+      fishScore = 0;
+      score = 0;
+      speed = 3.6;
+      frame = 0;
+      obstacles = [];
+      fishes = [];
+      shark.vy = 0;
+      shark.y = gameField.clientHeight / 2;
+      if (gameOverlay) gameOverlay.style.display = "none";
+      updateGameText();
+      spawnObstacle();
+    }
+
+    function drawBackground() {
+      const w = gameField.clientWidth;
+      const h = gameField.clientHeight;
+      const g = ctx.createLinearGradient(0, 0, 0, h);
+      g.addColorStop(0, "#0b2d45");
+      g.addColorStop(1, "#07192a");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = "rgba(120, 240, 255, 0.22)";
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 4; i += 1) {
+        const y = 32 + i * 46;
+        ctx.beginPath();
+        ctx.moveTo(0, y + Math.sin((frame + i * 20) * 0.04) * 2);
+        ctx.lineTo(w, y + Math.cos((frame + i * 12) * 0.04) * 2);
+        ctx.stroke();
+      }
+    }
+
+    function gameLoop() {
+      if (!ctx) return;
+      const h = gameField.clientHeight;
+
+      if (running) {
+        frame += 1;
+        shark.vy += 0.24;
+        shark.vy = Math.min(shark.vy, 6);
+        shark.y += shark.vy;
+        distance += speed * 0.08;
+        score = Math.floor(distance + fishScore * 25);
+        speed = Math.min(6.8, speed + 0.0008);
+
+        if (frame % 95 === 0) {
+          spawnObstacle();
+        }
+
+        obstacles.forEach(function (obstacle) {
+          obstacle.x -= speed;
+        });
+        fishes.forEach(function (fish) {
+          fish.x -= speed;
+        });
+
+        obstacles = obstacles.filter(function (obstacle) {
+          return obstacle.x + obstacle.width > -30;
+        });
+        fishes = fishes.filter(function (fish) {
+          return fish.x + fish.size > -20 && !fish.taken;
+        });
+
+        for (let i = 0; i < obstacles.length; i += 1) {
+          const obstacle = obstacles[i];
+          const topRect = { x: obstacle.x, y: 0, w: obstacle.width, h: obstacle.gapTop };
+          const bottomRect = {
+            x: obstacle.x,
+            y: obstacle.gapBottom,
+            w: obstacle.width,
+            h: h - obstacle.gapBottom
+          };
+
+          if (isCollidingRect(topRect) || isCollidingRect(bottomRect)) {
+            endGame();
+          }
+        }
+
+        for (let j = 0; j < fishes.length; j += 1) {
+          const fish = fishes[j];
+          const dx = shark.x - fish.x;
+          const dy = shark.y - fish.y;
+          if (dx * dx + dy * dy < (shark.size + fish.size) * (shark.size + fish.size)) {
+            fish.taken = true;
+            fishScore += 1;
+            score = Math.floor(distance + fishScore * 25);
+            showToast("Chomp +1 fish");
+          }
+        }
+
+        if (shark.y - shark.size < 0 || shark.y + shark.size > h) {
+          endGame();
+        }
+      }
+
+      drawBackground();
+
+      obstacles.forEach(function (obstacle) {
+        drawSeaweed(obstacle.x, 0, obstacle.gapTop);
+        drawSeaweed(obstacle.x, obstacle.gapBottom, h - obstacle.gapBottom);
+      });
+
+      fishes.forEach(function (fish) {
+        ctx.fillStyle = "#ffc857";
+        ctx.beginPath();
+        ctx.arc(fish.x, fish.y, fish.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(fish.x - fish.size, fish.y);
+        ctx.lineTo(fish.x - fish.size - 7, fish.y - 5);
+        ctx.lineTo(fish.x - fish.size - 7, fish.y + 5);
+        ctx.closePath();
+        ctx.fill();
+      });
+
+      drawShark();
+      updateGameText();
+      rafId = window.requestAnimationFrame(gameLoop);
+    }
+
+    if (gameBestElement) {
+      gameBestElement.textContent = String(bestScore);
+    }
+    resizeCanvas();
+    gameLoop();
+    window.addEventListener("resize", resizeCanvas);
+
+    if (startGameBtn) {
+      startGameBtn.addEventListener("click", function () {
+        resetGame();
+        showToast("Shark run started.");
+      });
+    }
+
+    if (gameField) {
+      gameField.addEventListener("pointerdown", function () {
+        if (!running) return;
+        flap();
+      });
+    }
+
+    window.addEventListener("keydown", function (event) {
+      if (event.code === "Space" || event.code === "ArrowUp") {
+        if (running) {
+          event.preventDefault();
+          flap();
+        }
+      }
     });
-  }
 
-  if (startGameBtn) {
-    startGameBtn.addEventListener("click", function () {
-      startGame();
-      showToast("Shark Rush started.");
+    window.addEventListener("beforeunload", function () {
+      if (rafId) {
+        window.cancelAnimationFrame(rafId);
+      }
     });
   }
 
