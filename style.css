@@ -399,12 +399,6 @@ p {
   box-shadow: var(--shadow);
 }
 
-.shark-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
 .shark-fact {
   margin-top: 0;
 }
@@ -419,56 +413,6 @@ p {
   display: flex;
   gap: 0.8rem;
   flex-wrap: wrap;
-}
-
-.mini-title {
-  margin-bottom: 0.45rem;
-}
-
-.mini-help {
-  margin-top: 0;
-  font-size: 0.92rem;
-}
-
-.game-stats {
-  display: flex;
-  gap: 0.9rem;
-  flex-wrap: wrap;
-  color: var(--muted);
-  font-size: 0.92rem;
-  margin-bottom: 0.8rem;
-}
-
-.game-field {
-  position: relative;
-  height: 210px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background:
-    radial-gradient(circle at 85% 12%, rgba(88, 243, 255, 0.25), transparent 30%),
-    radial-gradient(circle at 12% 70%, rgba(54, 209, 255, 0.23), transparent 32%),
-    linear-gradient(170deg, #081726, #0b2438);
-  overflow: hidden;
-  margin-bottom: 0.9rem;
-}
-
-.game-field canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.game-overlay {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  margin: 0;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: #d7f8ff;
-  text-shadow: 0 0 16px rgba(88, 243, 255, 0.5);
-  pointer-events: none;
 }
 
 .site-footer {
@@ -519,10 +463,6 @@ p {
 
   .identity-cards {
     grid-template-columns: 1fr 1fr;
-  }
-
-  .shark-grid {
-    grid-template-columns: 1fr;
   }
 
   .project-image {
