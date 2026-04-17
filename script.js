@@ -185,10 +185,12 @@
     let running = false;
     let countdownActive = false;
     let countdownTimer = null;
+    let pointerHeld = false;
+    let keyHeld = false;
     let distance = 0;
     let fishScore = 0;
     let score = 0;
-    let speed = 3.6;
+    let speed = 2.8;
     let frame = 0;
     let obstacles = [];
     let fishes = [];
@@ -262,6 +264,8 @@
     function endGame() {
       running = false;
       countdownActive = false;
+      pointerHeld = false;
+      keyHeld = false;
       if (gameOverlay) {
         gameOverlay.textContent = "Crashed into seaweed. Score: " + score;
         gameOverlay.style.display = "block";
@@ -276,16 +280,18 @@
 
     function flap() {
       if (!running) return;
-      shark.vy = -4.3;
+      shark.vy = -3.6;
     }
 
     function resetGameState() {
       running = false;
       countdownActive = false;
+      pointerHeld = false;
+      keyHeld = false;
       distance = 0;
       fishScore = 0;
       score = 0;
-      speed = 3.6;
+      speed = 2.8;
       frame = 0;
       obstacles = [];
       fishes = [];
@@ -359,14 +365,18 @@
 
       if (running) {
         frame += 1;
-        shark.vy += 0.17;
-        shark.vy = Math.min(shark.vy, 5.2);
+        shark.vy += 0.13;
+        shark.vy = Math.min(shark.vy, 4.2);
+
+        if (pointerHeld || keyHeld) {
+          shark.vy -= 0.2;
+        }
         shark.y += shark.vy;
         distance += speed * 0.08;
         score = Math.floor(distance + fishScore * 25);
-        speed = Math.min(6.8, speed + 0.0008);
+        speed = Math.min(4.5, speed + 0.00035);
 
-        if (frame % 95 === 0) {
+        if (frame % 125 === 0) {
           spawnObstacle();
         }
 
@@ -458,7 +468,20 @@
     if (gameField) {
       gameField.addEventListener("pointerdown", function () {
         if (!running || countdownActive) return;
+        pointerHeld = true;
         flap();
+      });
+
+      gameField.addEventListener("pointerup", function () {
+        pointerHeld = false;
+      });
+
+      gameField.addEventListener("pointerleave", function () {
+        pointerHeld = false;
+      });
+
+      gameField.addEventListener("pointercancel", function () {
+        pointerHeld = false;
       });
     }
 
@@ -466,8 +489,17 @@
       if (event.code === "Space" || event.code === "ArrowUp") {
         if (running) {
           event.preventDefault();
-          flap();
+          if (!keyHeld) {
+            flap();
+          }
+          keyHeld = true;
         }
+      }
+    });
+
+    window.addEventListener("keyup", function (event) {
+      if (event.code === "Space" || event.code === "ArrowUp") {
+        keyHeld = false;
       }
     });
 
