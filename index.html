@@ -18,6 +18,7 @@
       <ul class="nav-links" id="navLinks">
         <li><a href="#about">About</a></li>
         <li><a href="#projects">Projects</a></li>
+        <li><a href="#shark-zone">Shark Zone</a></li>
         <li><a href="#contacts">Contacts</a></li>
       </ul>
     </nav>
@@ -31,6 +32,7 @@
           <h1>Hi, I'm Maksim</h1>
           <p class="role">Scripter • Junior Animator • Marketer • Project Manager</p>
           <p class="tagline">Coffee first, code second. If it works, don't touch it.</p>
+          <p class="fun-line">Special buff: shark energy +200 focus.</p>
           <div class="hero-actions">
             <a class="btn btn-primary" href="https://www.roblox.com/users/1424249471/profile" target="_blank" rel="noopener noreferrer">Roblox Profile</a>
             <a class="btn btn-ghost" href="#projects">View Project</a>
@@ -40,7 +42,7 @@
         <div class="hero-avatar">
           <img id="avatarImage" src="avatar.jpg" alt="Maksim avatar" />
           <div id="avatarFallback" class="avatar-fallback" aria-hidden="true">M</div>
-          <p class="avatar-note">Put your image as <code>avatar.jpg</code> near <code>index.html</code>.</p>
+          <p class="avatar-note">Avatar source: <code>avatar.jpg</code>.</p>
         </div>
       </div>
     </section>
@@ -75,8 +77,8 @@
         <h2>Projects</h2>
 
         <article class="project-card">
-          <div class="project-image" role="img" aria-label="FTDS 2 project placeholder image">
-            <span>FTDS 2</span>
+          <div class="project-image project-image-real">
+            <img src="https://tr.rbxcdn.com/180DAY-1ca5c6a59420ddd82d891c87e1b1b218/150/150/Image/Webp/noFilter" alt="FTDS 2 game thumbnail" loading="lazy" />
           </div>
           <div class="project-body">
             <h3>FTDS 2 🎈FNaF TD 2🎈 [ALPHA]</h3>
@@ -94,6 +96,20 @@
             <a class="btn btn-primary" href="https://www.roblox.com/games/16845523118/FTDS-2-FNaF-TD-2" target="_blank" rel="noopener noreferrer">Open Game</a>
           </div>
         </article>
+      </div>
+    </section>
+
+    <section id="shark-zone" class="section">
+      <div class="container reveal">
+        <h2>Shark Zone</h2>
+        <p>Small fun corner: random shark fact + deep-sea neon mode.</p>
+        <div class="shark-panel">
+          <p id="sharkFact" class="shark-fact">Loading shark fact...</p>
+          <div class="shark-actions">
+            <button class="btn btn-primary" id="newFactBtn" type="button">New Shark Fact</button>
+            <button class="btn btn-ghost" id="seaModeBtn" type="button">Toggle Deep Sea Mode</button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -116,9 +132,11 @@
 
   <footer class="site-footer">
     <div class="container">
-      <p>© <span id="year"></span> Maksim. Built for GitHub Pages.</p>
+      <p>© <span id="year"></span> Maksim. Built for GitHub Pages. Powered by coffee and sharks.</p>
     </div>
   </footer>
+
+  <div id="easterEgg" class="easter-egg" aria-live="polite"></div>
 
   <script src="script.js"></script>
 </body>

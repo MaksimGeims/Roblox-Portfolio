@@ -85,4 +85,62 @@
       el.classList.add("visible");
     });
   }
+
+  const sharkFacts = [
+    "Sharks existed before dinosaurs.",
+    "Some sharks can sense tiny electric signals from prey.",
+    "A group of sharks can be called a shiver.",
+    "Not all sharks are huge. Some are small enough to fit in your hand.",
+    "Many sharks need to keep swimming to breathe efficiently."
+  ];
+
+  const sharkFactElement = document.getElementById("sharkFact");
+  const newFactBtn = document.getElementById("newFactBtn");
+  const seaModeBtn = document.getElementById("seaModeBtn");
+  const easterEgg = document.getElementById("easterEgg");
+
+  function randomFact() {
+    return sharkFacts[Math.floor(Math.random() * sharkFacts.length)];
+  }
+
+  function showToast(message) {
+    if (!easterEgg) return;
+    easterEgg.textContent = message;
+    easterEgg.classList.add("show");
+    window.setTimeout(function () {
+      easterEgg.classList.remove("show");
+    }, 1800);
+  }
+
+  if (sharkFactElement) {
+    sharkFactElement.textContent = randomFact();
+  }
+
+  if (newFactBtn && sharkFactElement) {
+    newFactBtn.addEventListener("click", function () {
+      sharkFactElement.textContent = randomFact();
+      showToast("Fresh shark fact loaded.");
+    });
+  }
+
+  const storedSeaMode = window.localStorage.getItem("deepSeaMode") === "1";
+  if (storedSeaMode) {
+    document.body.classList.add("deep-mode");
+  }
+
+  if (seaModeBtn) {
+    seaModeBtn.addEventListener("click", function () {
+      const enabled = document.body.classList.toggle("deep-mode");
+      window.localStorage.setItem("deepSeaMode", enabled ? "1" : "0");
+      showToast(enabled ? "Deep Sea Mode enabled." : "Deep Sea Mode disabled.");
+    });
+  }
+
+  let keyBuffer = "";
+  window.addEventListener("keydown", function (event) {
+    keyBuffer = (keyBuffer + event.key.toLowerCase()).slice(-5);
+    if (keyBuffer === "shark") {
+      showToast("Shark combo unlocked.");
+    }
+  });
 })();
