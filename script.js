@@ -12,8 +12,18 @@
   }
 
   const ageElement = document.getElementById("currentAge");
+  const ageDetailsElement = document.getElementById("ageDetails");
   if (ageElement) {
     ageElement.textContent = String(age);
+  }
+
+  if (ageDetailsElement) {
+    const nextBirthdayYear = hasBirthdayPassed ? now.getFullYear() + 1 : now.getFullYear();
+    const nextBirthday = new Date(nextBirthdayYear, birthDate.getMonth(), birthDate.getDate());
+    const oneDay = 24 * 60 * 60 * 1000;
+    const daysLeft = Math.ceil((nextBirthday - now) / oneDay);
+    ageDetailsElement.textContent =
+      daysLeft === 0 ? "Birthday is today. Level up!" : "Next birthday in " + daysLeft + " days";
   }
 
   const yearElement = document.getElementById("year");
@@ -95,8 +105,17 @@
   ];
 
   const sharkFactElement = document.getElementById("sharkFact");
+  const sharkMemeLineElement = document.getElementById("sharkMemeLine");
   const newFactBtn = document.getElementById("newFactBtn");
+  const memeBtn = document.getElementById("memeBtn");
   const seaModeBtn = document.getElementById("seaModeBtn");
+  const startGameBtn = document.getElementById("startGameBtn");
+  const fishBtn = document.getElementById("fishBtn");
+  const gameField = document.getElementById("gameField");
+  const gameOverlay = document.getElementById("gameOverlay");
+  const gameTimeElement = document.getElementById("gameTime");
+  const gameScoreElement = document.getElementById("gameScore");
+  const gameBestElement = document.getElementById("gameBest");
   const easterEgg = document.getElementById("easterEgg");
 
   function randomFact() {
@@ -123,6 +142,26 @@
     });
   }
 
+  const sharkMemes = [
+    "Shark mode: ON. Bugs: OFF (hopefully).",
+    "Code review approved by the Council of Sharks.",
+    "If it compiles, the shark smiles.",
+    "Coffee + shark playlist = +20 coding speed.",
+    "Deploy first, panic never."
+  ];
+
+  if (sharkMemeLineElement) {
+    sharkMemeLineElement.textContent = sharkMemes[0];
+  }
+
+  if (memeBtn && sharkMemeLineElement) {
+    memeBtn.addEventListener("click", function () {
+      const randomIndex = Math.floor(Math.random() * sharkMemes.length);
+      sharkMemeLineElement.textContent = sharkMemes[randomIndex];
+      showToast("New meme line delivered.");
+    });
+  }
+
   const storedSeaMode = window.localStorage.getItem("deepSeaMode") === "1";
   if (storedSeaMode) {
     document.body.classList.add("deep-mode");
@@ -133,6 +172,91 @@
       const enabled = document.body.classList.toggle("deep-mode");
       window.localStorage.setItem("deepSeaMode", enabled ? "1" : "0");
       showToast(enabled ? "Deep Sea Mode enabled." : "Deep Sea Mode disabled.");
+    });
+  }
+
+  let gameTimer = null;
+  let gameLeft = 15;
+  let gameScore = 0;
+  let gameRunning = false;
+  const bestScore = Number(window.localStorage.getItem("sharkRushBest") || "0");
+
+  if (gameBestElement) {
+    gameBestElement.textContent = String(bestScore);
+  }
+
+  function setGameText() {
+    if (gameTimeElement) gameTimeElement.textContent = String(gameLeft);
+    if (gameScoreElement) gameScoreElement.textContent = String(gameScore);
+  }
+
+  function moveFish() {
+    if (!fishBtn || !gameField) return;
+    const fishSize = fishBtn.offsetWidth || 56;
+    const maxX = gameField.clientWidth - fishSize;
+    const maxY = gameField.clientHeight - fishSize;
+    const x = Math.max(0, Math.floor(Math.random() * maxX));
+    const y = Math.max(0, Math.floor(Math.random() * maxY));
+    fishBtn.style.left = x + fishSize / 2 + "px";
+    fishBtn.style.top = y + fishSize / 2 + "px";
+  }
+
+  function stopGame() {
+    gameRunning = false;
+    if (fishBtn) fishBtn.disabled = true;
+    if (gameTimer) {
+      window.clearInterval(gameTimer);
+      gameTimer = null;
+    }
+    if (gameOverlay) {
+      gameOverlay.textContent = "Finished. Score: " + gameScore;
+      gameOverlay.style.display = "block";
+    }
+    const oldBest = Number(window.localStorage.getItem("sharkRushBest") || "0");
+    if (gameScore > oldBest) {
+      window.localStorage.setItem("sharkRushBest", String(gameScore));
+      if (gameBestElement) gameBestElement.textContent = String(gameScore);
+      showToast("New high score: " + gameScore);
+    }
+  }
+
+  function startGame() {
+    gameLeft = 15;
+    gameScore = 0;
+    gameRunning = true;
+    setGameText();
+    if (fishBtn) fishBtn.disabled = false;
+    if (gameOverlay) gameOverlay.style.display = "none";
+    moveFish();
+
+    if (gameTimer) {
+      window.clearInterval(gameTimer);
+    }
+    gameTimer = window.setInterval(function () {
+      gameLeft -= 1;
+      setGameText();
+      if (gameLeft <= 0) {
+        stopGame();
+      }
+    }, 1000);
+  }
+
+  setGameText();
+
+  if (fishBtn) {
+    fishBtn.disabled = true;
+    fishBtn.addEventListener("click", function () {
+      if (!gameRunning) return;
+      gameScore += 1;
+      setGameText();
+      moveFish();
+    });
+  }
+
+  if (startGameBtn) {
+    startGameBtn.addEventListener("click", function () {
+      startGame();
+      showToast("Shark Rush started.");
     });
   }
 

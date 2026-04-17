@@ -50,14 +50,41 @@
     <section id="about" class="section">
       <div class="container reveal">
         <h2>About Me</h2>
-        <p>
-          I'm <strong>Maksim</strong>, <span id="currentAge">--</span> years old (born April 25, 2009).
-          I was born in Ukraine and now live in Germany. I build game systems, create UI flows,
-          help with animation, and manage my own projects.
-        </p>
-        <p>
-          Languages: Ukrainian (native), Russian (native), English (around A2), German (A2).
-        </p>
+        <div class="about-grid">
+          <div class="about-main">
+            <p>
+              I'm <strong>Maksim</strong>. I build game systems, create UI flows, help with animation,
+              and manage my own projects.
+            </p>
+            <div class="identity-cards">
+              <article class="identity-card">
+                <p class="identity-label">Age</p>
+                <p class="identity-value"><span id="currentAge">--</span> years</p>
+                <p class="identity-note" id="ageDetails">Born 25.04.2009</p>
+              </article>
+              <article class="identity-card">
+                <p class="identity-label">Born In</p>
+                <p class="identity-value">Ukraine</p>
+                <p class="identity-note">Now living in Germany</p>
+              </article>
+              <article class="identity-card">
+                <p class="identity-label">Current Focus</p>
+                <p class="identity-value">Roblox Scripting</p>
+                <p class="identity-note">UI, animation basics, project management</p>
+              </article>
+            </div>
+          </div>
+
+          <aside class="languages-panel">
+            <h3>Languages</h3>
+            <ul class="language-list">
+              <li><span>🇺🇦 Ukrainian</span><strong>Native</strong></li>
+              <li><span>🇷🇺 Russian</span><strong>Native</strong></li>
+              <li><span>🇬🇧 English</span><strong>A2</strong></li>
+              <li><span>🇩🇪 German</span><strong>A2</strong></li>
+            </ul>
+          </aside>
+        </div>
 
         <div class="skills">
           <span>Lua</span>
@@ -102,12 +129,32 @@
     <section id="shark-zone" class="section">
       <div class="container reveal">
         <h2>Shark Zone</h2>
-        <p>Small fun corner: random shark fact + deep-sea neon mode.</p>
-        <div class="shark-panel">
-          <p id="sharkFact" class="shark-fact">Loading shark fact...</p>
-          <div class="shark-actions">
-            <button class="btn btn-primary" id="newFactBtn" type="button">New Shark Fact</button>
-            <button class="btn btn-ghost" id="seaModeBtn" type="button">Toggle Deep Sea Mode</button>
+        <p>Small fun corner: shark facts, meme energy and one tiny mini-game.</p>
+
+        <div class="shark-grid">
+          <div class="shark-panel">
+            <p id="sharkFact" class="shark-fact">Loading shark fact...</p>
+            <p id="sharkMemeLine" class="shark-meme">Shark mood: loading...</p>
+            <div class="shark-actions">
+              <button class="btn btn-primary" id="newFactBtn" type="button">New Shark Fact</button>
+              <button class="btn btn-ghost" id="memeBtn" type="button">Drop Meme Line</button>
+              <button class="btn btn-ghost" id="seaModeBtn" type="button">Toggle Deep Sea Mode</button>
+            </div>
+          </div>
+
+          <div class="shark-panel shark-game-panel">
+            <h3 class="mini-title">Mini Game: Feed The Shark</h3>
+            <p class="mini-help">Tap the fish before time runs out. 15 seconds, pure shark business.</p>
+            <div class="game-stats">
+              <span>Time: <strong id="gameTime">15</strong>s</span>
+              <span>Score: <strong id="gameScore">0</strong></span>
+              <span>Best: <strong id="gameBest">0</strong></span>
+            </div>
+            <div class="game-field" id="gameField" aria-label="Mini game field">
+              <button id="fishBtn" class="fish-btn" type="button" aria-label="Catch fish">🐟</button>
+              <p id="gameOverlay" class="game-overlay">Press Start</p>
+            </div>
+            <button class="btn btn-primary" id="startGameBtn" type="button">Start Shark Rush</button>
           </div>
         </div>
       </div>
